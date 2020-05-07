@@ -53,9 +53,6 @@ export const Twitt = (props: Props) => {
           <Avatar.Image source={{ uri: props.avatar }} size={60} />
         </View>
         <View style={styles.rightColumn}>
-          <Button onPress={()=>alert('akdhf')}  theme={{ roundness: 3 }}>
-            Press me
-          </Button>
           <View style={styles.topRow}>
             <Title>{props.name}</Title>
             <Caption style={styles.handle}>{props.handle}</Caption>

@@ -1,11 +1,12 @@
 import React from 'react';
-import { FlatList, View, StyleSheet } from 'react-native';
+import {FlatList, View, StyleSheet, ImageBackground, Image, Dimensions} from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from 'react-native-paper';
 
 import { Twitt } from './components/twitt';
 import { twitts } from './data';
 import { StackNavigatorParamlist } from './types';
+import { Portal } from "react-native-paper";
 
 type TwittProps = React.ComponentProps<typeof Twitt>;
 
@@ -34,15 +35,17 @@ export const Feed = (props: Props) => {
   }));
 
   return (
-    <FlatList
-      contentContainerStyle={{ backgroundColor: theme.colors.background }}
-      style={{ backgroundColor: theme.colors.background }}
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      ItemSeparatorComponent={() => (
-        <View style={{ height: StyleSheet.hairlineWidth }} />
-      )}
-    />
+        <Image source={require('./assets/bg_home.jpg')} style={{width: '100%', height: Dimensions.get('window').height, resizeMode: 'cover', position: 'absolute', backgroundColor: 'red'}}>
+    {/*<FlatList*/}
+    {/*  contentContainerStyle={{ backgroundColor: theme.colors.background }}*/}
+    {/*  style={{ backgroundColor: theme.colors.background }}*/}
+    {/*  data={data}*/}
+    {/*  renderItem={renderItem}*/}
+    {/*  keyExtractor={keyExtractor}*/}
+    {/*  ItemSeparatorComponent={() => (*/}
+    {/*    <View style={{ height: StyleSheet.hairlineWidth }} />*/}
+    {/*  )}*/}
+    {/*/>*/}
+        </Image>
   );
 };

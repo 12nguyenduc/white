@@ -15,9 +15,7 @@ export const RootNavigator = () => {
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />}>
-        <Drawer.Screen name="Home" component={StackNavigator} />
-      </Drawer.Navigator>
+      <StackNavigator/>
     </NavigationContainer>
   );
 };
