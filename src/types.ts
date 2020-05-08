@@ -12,4 +12,7 @@ export type StackNavigatorParamlist = {
     retweets: number;
     hearts: number;
   };
+  SetTime: {
+    item: any
+  };
 };

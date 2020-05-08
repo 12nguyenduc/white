@@ -18,14 +18,14 @@ export const Notifications = () => {
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     { key: 'all', title: 'All' },
-    { key: 'mentions', title: 'Mentions' },
+    // { key: 'mentions', title: 'Mentions' },
   ]);
 
   const theme = useTheme();
 
   const renderScene = SceneMap({
     all: All,
-    mentions: Mentions,
+    // mentions: Mentions,
   });
 
   const tabBarColor = theme.dark

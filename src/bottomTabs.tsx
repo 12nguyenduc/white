@@ -111,6 +111,7 @@ export const BottomTabs = (props: Props) => {
   const tabBarColor = theme.dark
     ? (overlay(6, theme.colors.surface) as string)
     : theme.colors.surface;
+    StatusBar.setTranslucent(true)
 
   return (
     <React.Fragment>
@@ -130,6 +131,7 @@ export const BottomTabs = (props: Props) => {
       >
         <Tab.Screen
           name="Feed"
+          key={'1'}
           component={Feed}
           options={{
               tabBarIcon: ({ color }) => (
@@ -138,7 +140,8 @@ export const BottomTabs = (props: Props) => {
           }}
         />
         <Tab.Screen
-          name="Notifications"
+            key={'2'}
+            name="Notifications"
           component={Notifications}
           options={{
             tabBarIcon: ({ color }) => (
@@ -147,7 +150,8 @@ export const BottomTabs = (props: Props) => {
           }}
         />
         <Tab.Screen
-          name="Messages"
+        key={'3'}
+        name="Messages"
           component={Message}
           options={{
             tabBarIcon: ({ color }) => (

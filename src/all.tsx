@@ -4,11 +4,12 @@ import { useTheme } from 'react-native-paper';
 
 import { NotificationTwitt } from './components/notificationTwitt';
 import { notificationTweets } from './data';
+import {DetailedTwitt} from "./components/detailedTwitt";
 
-type NotificationTwittProps = React.ComponentProps<typeof NotificationTwitt>;
+type NotificationTwittProps = React.ComponentProps<typeof DetailedTwitt>;
 
 function renderItem({ item }: { item: NotificationTwittProps }) {
-  return <NotificationTwitt {...item} />;
+  return <DetailedTwitt {...item} />;
 }
 
 function keyExtractor(item: NotificationTwittProps) {
