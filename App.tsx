@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeArea } from 'react-native-safe-area-context';
 import { AppearanceProvider } from 'react-native-appearance';
 
 import { Main } from './src/main';

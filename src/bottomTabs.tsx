@@ -15,7 +15,7 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Animated from 'react-native-reanimated';
-import {Button, TouchableOpacity, View} from "react-native";
+import {Button, TouchableOpacity, View, StatusBar, StatusBarStyle} from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -24,7 +24,7 @@ function MyTabBar({ state, descriptors, navigation, position }) {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const safeArea = useSafeArea();
     return (
-        <View style={{ flexDirection: 'row', backgroundColor: selectedIndex===0?'transparent':'white', width: '100%', height: 50, position:'absolute', bottom: safeArea.bottom }}>
+        <View style={{borderTopWidth: 0.35, borderTopColor: selectedIndex !== 0 ? '#00000020' : '#ffffff30', paddingHorizontal: 16, flexDirection: 'row', backgroundColor: selectedIndex===0?'transparent':'white', width: '100%', height: 50, position:'absolute', bottom: safeArea.bottom }}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const label =
@@ -35,10 +35,13 @@ function MyTabBar({ state, descriptors, navigation, position }) {
                         : route.name;
 
                 const isFocused = state.index === index;
-                if(isFocused && selectedIndex!==index)
-                    setSelectedIndex(index)
+                if(isFocused && selectedIndex!==index){
+                    setSelectedIndex(index);
+                    StatusBar.setBackgroundColor(index===0?'transparent':'white');
+                    StatusBar.setBarStyle(index===0?'light-content':'dark-content')
+                }
 
-                const icon = options.tabBarIcon({color: selectedIndex===0?(isFocused?'#b3b0b1':'#b4b1b2'):(isFocused?'#404040':'#e6e6e6')});
+                const icon = options.tabBarIcon({color: selectedIndex===0?(isFocused?'white':'#b4b1b2'):(isFocused?'#404040':'#e6e6e6')});
 
                 const onPress = () => {
                     const event = navigation.emit({
@@ -112,7 +115,8 @@ export const BottomTabs = (props: Props) => {
   return (
     <React.Fragment>
       <Tab.Navigator
-          style={{}}
+          style={{backgroundColor: 'red'}}
+          swipeEnabled={false}
           tabBarPosition={'bottom'}
           initialRouteName="Feed"
           tabBarOptions={{
@@ -129,7 +133,7 @@ export const BottomTabs = (props: Props) => {
           component={Feed}
           options={{
               tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name='home-variant' color={color} size={22} />
+                  <MaterialCommunityIcons name='home-variant' color={color} size={24} />
               ),
           }}
         />
@@ -138,7 +142,7 @@ export const BottomTabs = (props: Props) => {
           component={Notifications}
           options={{
             tabBarIcon: ({ color }) => (
-                <Fontisto name="compass" color={color} size={20} />
+                <Fontisto name="compass" color={color} size={22} />
             ),
           }}
         />
@@ -147,7 +151,7 @@ export const BottomTabs = (props: Props) => {
           component={Message}
           options={{
             tabBarIcon: ({ color }) => (
-              <FontAwesome name='circle-thin' color={color} size={20} />
+              <FontAwesome name='circle-thin' color={color} size={22} />
             ),
           }}
         />
