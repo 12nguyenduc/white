@@ -13,3 +13,4 @@ export default function App() {
       </SafeAreaProvider>
   );
 }
+console.disableYellowBox = true;

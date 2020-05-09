@@ -15,7 +15,7 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Animated from 'react-native-reanimated';
-import {Button, TouchableOpacity, View, StatusBar, StatusBarStyle} from "react-native";
+import {Button, TouchableOpacity, View, StatusBar, StatusBarStyle, Platform} from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -37,7 +37,8 @@ function MyTabBar({ state, descriptors, navigation, position }) {
                 const isFocused = state.index === index;
                 if(isFocused && selectedIndex!==index){
                     setSelectedIndex(index);
-                    StatusBar.setBackgroundColor(index===0?'transparent':'white');
+                    if(Platform.OS==='android')
+                        StatusBar.setBackgroundColor(index===0?'transparent':'white');
                     StatusBar.setBarStyle(index===0?'light-content':'dark-content')
                 }
 
@@ -70,6 +71,7 @@ function MyTabBar({ state, descriptors, navigation, position }) {
 
                 return (
                     <TouchableOpacity
+                        key={index+''}
                         onPress={onPress}
                         onLongPress={onLongPress}
                         style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
@@ -111,7 +113,8 @@ export const BottomTabs = (props: Props) => {
   const tabBarColor = theme.dark
     ? (overlay(6, theme.colors.surface) as string)
     : theme.colors.surface;
-    StatusBar.setTranslucent(true)
+    if(Platform.OS==='android')
+        StatusBar.setTranslucent(true)
 
   return (
     <React.Fragment>

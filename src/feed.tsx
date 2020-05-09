@@ -24,7 +24,8 @@ import FontAwesome from "react-native-vector-icons/FontAwesome5";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 type TwittProps = React.ComponentProps<typeof Twitt>;
 import BackgroundService from 'react-native-background-actions';
-import TrackPlayer, { TrackPlayerEvents, STATE_PLAYING } from 'react-native-track-player';
+import TrackPlayer, { TrackPlayerEvents, STATE_PLAYING, STATE_STOPPED, useTrackPlayerEvents } from 'react-native-track-player';
+import WebView from 'react-native-webview'
 
 function renderItem({ item }: { item: TwittProps }) {
   return <Twitt {...item} />;
@@ -38,27 +39,35 @@ type Props = {
   navigation?: StackNavigationProp<StackNavigatorParamlist>;
 };
 
-export const Feed = (props: Props) => {
-  const theme = useTheme();
-  const safeArea = useSafeArea();
-  const offset = new Animated.Value(0);
-  let registerListenTrack = false;
-  const data = [
-    { image: 'https://i.imgur.com/vofRaU9.jpg', sound: 'https://cdn.artlist.io/artlist-mp3/87179_05_-_Seven_Wonders_-_Master_(16-44.1).mp3'},
-    { image: 'https://i.imgur.com/1ieAm1M.jpg', sound: 'https://data25.chiasenhac.com/downloads/2073/5/2072958-2cfdf70c/128/Sweet%20Night%20-%20V%20BTS_.mp3'},
-    { image: 'https://i.imgur.com/VOvcaek.jpg', sound: 'https://data3.chiasenhac.com/downloads/1740/5/1739437-5434152c/320/River%20-%20Charlie%20Puth.mp3'},
-    { image: 'https://i.imgur.com/PRQhFq7.jpg', sound: 'https://data22.chiasenhac.com/downloads/1540/5/1539612-330ce8e7/320/One%20Call%20Away%20-%20Charlie%20Puth.mp3'},
-    { image: 'https://i.imgur.com/ab7CdIb.jpg', sound: 'https://data25.chiasenhac.com/downloads/2074/5/2073390-14cdb95e/320/Death%20Bed%20-%20Powfu_%20Beabadoobee.mp3'},
-    { image: 'https://i.imgur.com/OWBYX5h.jpg', sound: 'https://data20.chiasenhac.com/downloads/2064/5/2063840-c2a67058/320/No%20Shame%20-%205%20Seconds%20Of%20Summer.mp3'},
-    { image: 'https://i.imgur.com/fyea32A.jpg', sound: 'https://data25.chiasenhac.com/downloads/2084/5/2083023-0a0ccbed/320/Be%20Kind%20-%20Marshmello_%20Halsey.mp3'},
-  ];
-  const playTrack = (item:any)=>{
+const events = [
+  TrackPlayerEvents.PLAYBACK_STATE,
+  TrackPlayerEvents.PLAYBACK_ERROR
+];
+
+class PlayAudio extends React.PureComponent{
+  constructor(props:any) {
+    super(props);
+    this.state = {
+      item: props.item,
+      playerState: null
+    };
+    TrackPlayer.registerEventHandler(event=>{
+      console.log(event);
+      this.setState({playerState: event.state})
+      if(event.type==='playback-queue-ended'){
+        this.play(props.item)
+      }
+    })
+  }
+
+
+   play(item:any){
     if(!item.sound)
       return;
     try {
-      console.log(item)
       const start = async () => {
         // Set up the player
+        await TrackPlayer.stop();
         await TrackPlayer.setupPlayer();
 
         // Add a track to the queue
@@ -74,30 +83,53 @@ export const Feed = (props: Props) => {
         await TrackPlayer.play();
       };
       start();
-      if(!registerListenTrack){
-        registerListenTrack = true;
-        console.log(registerListenTrack)
-        TrackPlayer.registerEventHandler(e=>{
-          console.log('playStatus', e)
-          if(JSON.stringify(e)!==JSON.stringify(playStatus)){
-            setPlayStatus(e)
-          }
-          if(e.type==='playback-queue-ended'){
-             TrackPlayer.add({
-              id: 'trackId',
-              url: selected.sound,
-              title: 'Track Title',
-              artist: 'Track Artist',
-              artwork: selected.image
-            });
-             TrackPlayer.play();
-          }
-        })
-      }
     } catch (e) {
       console.log(`cannot play the sound file`, e)
     }
   }
+  touchAction(){
+    if(this.state.playerState===STATE_PLAYING){
+      TrackPlayer.pause();
+    }else{
+      TrackPlayer.play();
+    }
+  }
+  render() {
+    return (
+        <React.Fragment>
+          {
+            this.state.playerState !== STATE_PLAYING &&
+            <View
+                pointerEvents={'box-none'}
+                style={{
+                  position: 'absolute',
+                  width: Dimensions.get('screen').width,
+                  height: Dimensions.get('screen').height,
+                  top: (Dimensions.get('screen').height - 30) / 2,
+                  left: (Dimensions.get('screen').width - 30) / 2
+                }}
+            >
+              <FontAwesome name='play' color={'#ffffff80'} size={30}/>
+            </View>
+          }
+        </React.Fragment>
+    );
+  }
+}
+
+export const Feed = (props: Props) => {
+  const theme = useTheme();
+  const safeArea = useSafeArea();
+  const offset = new Animated.Value(0);
+  const data = [
+    { image: 'https://i.imgur.com/vofRaU9.jpg', sound: require('./audio/1050_daydream.mp3')},
+    { image: 'https://i.imgur.com/1ieAm1M.jpg', sound: require('./audio/1931_deep-cove.mp3')},
+    { image: 'https://i.imgur.com/VOvcaek.jpg', sound: require('./audio/24298_Rain_Bali_Indonesia.mp3')},
+    { image: 'https://i.imgur.com/PRQhFq7.jpg', sound: require('./audio/22082_Beach_wave.mp3')},
+    { image: 'https://i.imgur.com/ab7CdIb.jpg', sound: require('./audio/18331_Bird_night.mp3')},
+    { image: 'https://i.imgur.com/OWBYX5h.jpg', sound: require('./audio/cow.mp3')},
+    { image: 'https://i.imgur.com/fyea32A.jpg', sound: require('./audio/21104_Street_carnival.mp3')},
+  ];
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState({})
   const [playStatus, setPlayStatus] = useState({})
@@ -105,29 +137,69 @@ export const Feed = (props: Props) => {
   const [sleep, setSleep] = useState(false)
   const [nap, setNap] = useState(false)
   const [breath, setBreath] = useState(false);
+  let previous = 0;
+  let scrollState = 'idle';
+  const DURATION_VIEWPAGER = 250;
+  let webView: WebView | null;
+  let count = 0;
+  let playAudioRef: any = null;
+  const runJSInBackground = (code) =>{
+    code = `
+        (function a() {
+                window.ReactNativeWebView.postMessage('${code}');
+            })();
+    `;
+    webView?.injectJavaScript(code)
+  };
+  const handleMessage = (e) => {
+    try{
+      const message = e.nativeEvent.data;
+      const data = JSON.parse(message);
+      playAudioRef.play(data.item)
+    }catch (e) {
+      console.log(e)
+    }
+  }
   return (
   <React.Fragment>
+    <WebView
+        ref={el => webView = el}
+        style={{ width: 0, height: 0, position: 'absolute', backgroundColor: '#000'}}
+        source={{ html: '<html><body></body></html>' }}
+        // injectedJavaScript={`
+        //     (function a() {
+        //       var i=0;
+        //       while(i<1000000){
+        //         window.ReactNativeWebView.postMessage(i++);
+        //       }
+        //     })();`}
+        onMessage={handleMessage}
+    />
   <ViewPager
       style={{width: '100%', height: Dimensions.get('screen').height, position: 'absolute', backgroundColor: 'black'}}
       initialPage={0}
-      showPageIndicator={true}
       onPageSelected={e=>{
-        const item = data[e.nativeEvent.position]
-        setSelected(item)
-        setIndex(e.nativeEvent.position);
-        setTimeout(()=>{
-          playTrack(item)
-        }, 50)
+        const position = e.nativeEvent.position;
+        const item = data[position];
+        setSelected(item);
+        setIndex(index);
+        runJSInBackground(JSON.stringify({item: item, index: position}))
       }}
       onPageScroll={(e)=>{
-        if(e.nativeEvent.offset!==0){
-          // console.log(e.nativeEvent.offset)
+          let duration = 0;
+          if(scrollState==='settling')
+            duration = Math.abs(e.nativeEvent.offset - previous)*DURATION_VIEWPAGER/2;
+
           Animated.timing(offset, {
             toValue: e.nativeEvent.offset,
-            duration: 0,
+            duration: duration,
             useNativeDriver: true,
           }).start();
-        }
+          previous = e.nativeEvent.offset;
+        // }
+      }}
+      onPageScrollStateChanged={(e) => {
+        scrollState = e.nativeEvent.pageScrollState;
       }}
   >
     {
@@ -163,15 +235,13 @@ export const Feed = (props: Props) => {
         }
         return <TouchableWithoutFeedback
             onPress={()=>{
-
               try {
-                if(playStatus.state===3){
-                  TrackPlayer.pause();
-                }else{
-                  TrackPlayer.play();
+                console.log(offset._value);
+                if(offset._value===0){
+                  playAudioRef.touchAction();
                 }
               }catch (e) {
-                console.log(e)
+                console.log('Touchable',e)
               }
             }}
             key={i + ''}
@@ -208,71 +278,58 @@ export const Feed = (props: Props) => {
     }
   </ViewPager>
     <View style={{flex: 1, position: 'absolute', width: '100%', height: '100%'}} pointerEvents={'box-none'}>
-    <SafeAreaView style={{flex: 1,}} pointerEvents={'box-none'}>
-      <View style={styles.row}>
-        <Title style={styles.title}>Good day</Title>
-        {/*<Button*/}
-        {/*    onPress={()=>alert('share')}*/}
-        {/*    style={styles.buttonLeft}>*/}
-        {/*  <FontAwesome name='share' color={'white'} size={24} />*/}
-        {/*</Button>*/}
-        {/*<Button*/}
-        {/*    onPress={()=>alert('share')}*/}
-        {/*    style={styles.buttonRight}>*/}
-        {/*  <FontAwesome name='share' color={'white'} size={24} />*/}
-        {/*</Button>*/}
-      </View>
-      <Caption style={styles.caption}>This time you feel lonely is the time you most need to be by yourself</Caption>
-      {
-        playStatus.state===2 &&
-        <View
-            style={{
-              position: 'absolute',
-              width: Dimensions.get('screen').width,
-              height: Dimensions.get('screen').height,
-              top: (Dimensions.get('screen').height - 30) / 2,
-              left: (Dimensions.get('screen').width - 30) / 2
-            }}
-        >
-          <FontAwesome name='play' color={'#ffffff80'} size={30}/>
+      <SafeAreaView style={{flex: 1,}} pointerEvents={'box-none'}>
+        <View style={styles.row}>
+          <Title style={styles.title}>Good day</Title>
+          {/*<Button*/}
+          {/*    onPress={()=>alert('share')}*/}
+          {/*    style={styles.buttonLeft}>*/}
+          {/*  <FontAwesome name='share' color={'white'} size={24} />*/}
+          {/*</Button>*/}
+          {/*<Button*/}
+          {/*    onPress={()=>alert('share')}*/}
+          {/*    style={styles.buttonRight}>*/}
+          {/*  <FontAwesome name='share' color={'white'} size={24} />*/}
+          {/*</Button>*/}
         </View>
-      }
+        <Caption style={styles.caption}>This time you feel lonely is the time you most need to be by yourself</Caption>
+        <PlayAudio {...props} ref={ref=>playAudioRef=ref} item={selected}/>
 
-      <View style={[styles.row, {bottom: 64, width: '100%', height: 100,  position: 'absolute',}]} >
-        <View style={styles.containMode}>
+        <View style={[styles.row, {bottom: 64+safeArea.bottom, width: '100%', height: 100,  position: 'absolute',}]} >
+          <View style={styles.containMode}>
+              <TouchableOpacity
+                  onPress={()=>setFocus(true)}
+                  style={styles.buttonMode}>
+                <FontAwesome name='dot-circle' color={'white'} size={24}/>
+              </TouchableOpacity>
+              <Caption style={styles.titleMode}>Focus</Caption>
+          </View>
+          <View style={styles.containMode}>
             <TouchableOpacity
-                onPress={()=>setFocus(true)}
+                onPress={()=>setSleep(true)}
                 style={styles.buttonMode}>
-              <FontAwesome name='dot-circle' color={'white'} size={24}/>
+              <FontAwesome name='moon' color={'white'} size={24}/>
             </TouchableOpacity>
-            <Caption style={styles.titleMode}>Focus</Caption>
+            <Caption style={styles.titleMode}>Sleep</Caption>
+          </View>
+          <View style={styles.containMode}>
+            <TouchableOpacity
+                onPress={()=>setNap(true)}
+                style={styles.buttonMode}>
+              <MaterialCommunityIcons name='timelapse' color={'white'} size={28}/>
+            </TouchableOpacity>
+            <Caption style={styles.titleMode}>Nap</Caption>
+          </View>
+          <View style={styles.containMode}>
+            <TouchableOpacity
+                onPress={()=>setBreath(true)}
+                style={styles.buttonMode}>
+              <FontAwesome name='leaf' color={'white'} size={18}/>
+            </TouchableOpacity>
+            <Caption style={styles.titleMode}>Breath</Caption>
+          </View>
         </View>
-        <View style={styles.containMode}>
-          <TouchableOpacity
-              onPress={()=>setSleep(true)}
-              style={styles.buttonMode}>
-            <FontAwesome name='moon' color={'white'} size={24}/>
-          </TouchableOpacity>
-          <Caption style={styles.titleMode}>Sleep</Caption>
-        </View>
-        <View style={styles.containMode}>
-          <TouchableOpacity
-              onPress={()=>setNap(true)}
-              style={styles.buttonMode}>
-            <MaterialCommunityIcons name='timelapse' color={'white'} size={28}/>
-          </TouchableOpacity>
-          <Caption style={styles.titleMode}>Nap</Caption>
-        </View>
-        <View style={styles.containMode}>
-          <TouchableOpacity
-              onPress={()=>setBreath(true)}
-              style={styles.buttonMode}>
-            <FontAwesome name='leaf' color={'white'} size={18}/>
-          </TouchableOpacity>
-          <Caption style={styles.titleMode}>Breath</Caption>
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
     </View>
     {
       (focus || sleep || nap || breath)&&
